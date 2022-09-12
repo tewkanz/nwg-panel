@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GdkPixbuf
 
 import subprocess
 
@@ -19,7 +19,12 @@ class MenuStart(Gtk.Button):
         check_key(self.settings, "icon-size-button", 16)
 
         image = Gtk.Image()
-        update_image(image, "nwg-shell", self.settings["icon-size-button"], icons_path)
+        icon_name = "nwg_start_custom"
+        try:
+            GdkPixbuf.Pixbuf.new_from_file_at_size(icon_name, icon_size, icon_size)
+        except:
+            icon_name = "nwg_shell"
+        update_image(image, "Nix_snowflake_cust", self.settings["icon-size-button"], icons_path)
         self.set_image(image)
 
         self.connect("clicked", self.on_click)
