@@ -269,6 +269,7 @@ def list_outputs(sway=False, tree=None, silent=False):
                                            "height": item.rect.height,
                                            "monitor": None}
     elif os.getenv('WAYLAND_DISPLAY') is not None:
+        use_default = false
         if not silent:
             print("Running on Wayland, but not sway")
         if nwg_panel.common.commands["wlr-randr"]:
@@ -306,9 +307,20 @@ def list_outputs(sway=False, tree=None, silent=False):
                                                   'height': w,
                                                   'transform': transform,
                                                   'monitor': None}
+            else:
+                use_default = True
         else:
-            print("'wlr-randr' command not found, terminating")
-            sys.exit(1)
+            use_default = True
+        if use_default:
+            outputs_dict['eDP-1'] = {
+                'name': 'eDP-1',
+                'x': 0,
+                'y': 0,
+                'width': 1920,
+                'height': 1080,
+                'transform': "normal",
+                'monitor': None
+            }
 
     display = Gdk.Display.get_default()
     for i in range(display.get_n_monitors()):
