@@ -270,66 +270,53 @@ def list_outputs(sway=False, tree=None, silent=False):
                                            "monitor": None}
 
     elif os.getenv('WAYLAND_DISPLAY') is not None:
-        use_default = False
         if not silent:
             print("Running on Wayland, but not sway")
         if nwg_panel.common.commands["wlr-randr"]:
-            try:
-                lines = subprocess.check_output("wlr-randr", shell=True).decode("utf-8").strip().splitlines()
-                if lines:
-                    name, w, h, x, y, transform, scale = None, None, None, None, None, None, 1.0
-                    for line in lines:
-                        if not line.startswith(" "):
-                            name = line.split()[0]
-                        elif "current" in line:
-                            w_h = line.split()[0].split('x')
-                            w = int(w_h[0])
-                            h = int(w_h[1])
-                        elif "Transform" in line:
-                            transform = line.split()[1].strip()
-                        elif "Position" in line:
-                            x_y = line.split()[1].split(',')
-                            x = int(x_y[0])
-                            y = int(x_y[1])
-                        elif "Scale" in line:
-                            try:
-                                scale = float(line.split()[1])
-                            except ValueError:
-                                scale = 1.0
+            lines = subprocess.check_output("wlr-randr", shell=True).decode("utf-8").strip().splitlines()
+            if lines:
+                name, w, h, x, y, transform, scale = None, None, None, None, None, None, 1.0
+                for line in lines:
+                    if not line.startswith(" "):
+                        name = line.split()[0]
+                    elif "current" in line:
+                        w_h = line.split()[0].split('x')
+                        w = int(w_h[0])
+                        h = int(w_h[1])
+                    elif "Transform" in line:
+                        transform = line.split()[1].strip()
+                    elif "Position" in line:
+                        x_y = line.split()[1].split(',')
+                        x = int(x_y[0])
+                        y = int(x_y[1])
+                    elif "Scale" in line:
+                        try:
+                            scale = float(line.split()[1])
+                        except ValueError:
+                            scale = 1.0
 
-                        if name is not None and w is not None and h is not None and x is not None and y is not None \
-                                and transform is not None:
-                            if transform == "normal":
-                                outputs_dict[name] = {'name': name,
-                                                    'x': x,
-                                                    'y': y,
-                                                    'width': int(w / scale),
-                                                    'height': int(h / scale),
-                                                    'transform': transform,
-                                                    'monitor': None}
-                            else:
-                                outputs_dict[name] = {'name': name,
-                                                    'x': x,
-                                                    'y': y,
-                                                    'width': int(h / scale),
-                                                    'height': int(w / scale),
-                                                    'transform': transform,
-                                                    'scale': scale,
-                                                    'monitor': None}
-            except:
-                use_default = True
+                    if name is not None and w is not None and h is not None and x is not None and y is not None \
+                            and transform is not None:
+                        if transform == "normal":
+                            outputs_dict[name] = {'name': name,
+                                                  'x': x,
+                                                  'y': y,
+                                                  'width': int(w / scale),
+                                                  'height': int(h / scale),
+                                                  'transform': transform,
+                                                  'monitor': None}
+                        else:
+                            outputs_dict[name] = {'name': name,
+                                                  'x': x,
+                                                  'y': y,
+                                                  'width': int(h / scale),
+                                                  'height': int(w / scale),
+                                                  'transform': transform,
+                                                  'scale': scale,
+                                                  'monitor': None}
         else:
-            use_default = True
-        if use_default:
-            outputs_dict['eDP-1'] = {
-                'name': 'eDP-1',
-                'x': 0,
-                'y': 0,
-                'width': 1920,
-                'height': 1080,
-                'transform': "normal",
-                'monitor': None
-            }
+            print("'wlr-randr' command not found, terminating")
+            sys.exit(1)
 
     display = Gdk.Display.get_default()
     for i in range(display.get_n_monitors()):
